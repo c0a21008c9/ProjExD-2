@@ -7,6 +7,7 @@ import tkinter.messagebox as tkm #荒井担当分
 
 count1,count2=0,0 #荒井担当分
 
+#林担当
 def bgm():
     # 音楽ファイルの読み込み
     pg.mixer.music.load("ex06/Floor_Beast.mp3") 
@@ -26,7 +27,7 @@ class Screen:
         self.sfc.blit(self.bgi_sfc, self.bgi_rct) # スクリーンに描画
         
     
-class Kabe: # 右側のプレイヤーを作成する関数
+class Kabe: # 右側のプレイヤーを作成するクラス
     def __init__(self ,image,size,xy):  #scr: Screen):
         self.sfc=pg.image.load(image)#画像を取得
         self.sfc=pg.transform.rotozoom(self.sfc, 0, size)#1/4倍にズーム
@@ -38,43 +39,53 @@ class Kabe: # 右側のプレイヤーを作成する関数
     
     def update(self, scr: Screen):
         key_states = pg.key.get_pressed() # 辞書
-        if key_states[pg.K_w]: # wを押すと上に移動
-            self.rct.centery -= 1
-        if key_states[pg.K_s]: # sを押すと下に移動
-            self.rct.centery += 1
-        if check_bound(self.rct, scr.rct) != (1, 1): # 領域外だったら
-            if key_states[pg.K_w]: 
-                self.rct.centery += 1
-            if key_states[pg.K_s]: 
+        if self.rct.centerx<scr.rct.centerx:
+            if key_states[pg.K_w]: # wを押すと上に移動
                 self.rct.centery -= 1
+            if key_states[pg.K_s]: # sを押すと下に移動
+                self.rct.centery += 1
+            if check_bound(self.rct, scr.rct) != (1, 1): # 領域外だったら
+                if key_states[pg.K_w]: 
+                    self.rct.centery += 1
+                if key_states[pg.K_s]: 
+                    self.rct.centery -= 1
+        else:
+            if key_states[pg.K_UP]: # 上キーを押すと上に移動
+                self.rct.centery -= 1
+            if key_states[pg.K_DOWN]: # 下キーを押すと下に移動
+                self.rct.centery += 1
+            if check_bound(self.rct, scr.rct) != (1, 1): # 領域外だったら
+                if key_states[pg.K_UP]:  
+                    self.rct.centery += 1
+                if key_states[pg.K_DOWN]: 
+                    self.rct.centery -= 1
         self.blit(scr)
 
 
-class Kabe2: # 左側のプレイヤーを作成する関数
-    def __init__(self ,image,size,xy):  
-        self.sfc=pg.image.load(image)#画像を取得
-        self.sfc=pg.transform.rotozoom(self.sfc, 0, size)#1/4倍にズーム
-        self.rct=self.sfc.get_rect()
-        self.rct.center=xy #位置を設定
-        
+class Score: # スコアを描画するクラス
+    def __init__(self, score1, score2):
+        self.s1 = score1
+        self.s2 = score2
+        self.fscore1 = pg.font.Font("fig/font.ttf", 80) #中野担当分　フォントの追加
+        self.tscore1 = self.fscore1.render(str(self.s1), True, (255, 255, 255)) # 右側のプレイヤーのスコア
+        self.fscore2 = pg.font.Font("fig/font.ttf", 80)
+        self.tscore2 = self.fscore2.render(str(self.s2), True, (255, 255, 255)) # 左側のプレイヤーのスコア
     def blit(self, scr: Screen):
-        scr.sfc.blit(self.sfc, self.rct)
-    
-    def update(self, scr: Screen):
-        key_states = pg.key.get_pressed() # 辞書
-        if key_states[pg.K_UP]: # 上キーを押すと上に移動
-            self.rct.centery -= 1
-        if key_states[pg.K_DOWN]: # 下キーを押すと下に移動
-            self.rct.centery += 1
-        if check_bound(self.rct, scr.rct) != (1, 1): # 領域外だったら
-            if key_states[pg.K_UP]:  
-                self.rct.centery += 1
-            if key_states[pg.K_DOWN]: 
-                self.rct.centery -= 1
+        scr.sfc.blit(self.tscore1, (750, 20))
+        scr.sfc.blit(self.tscore2, (850, 20))
+
+    def update(self, scr: Screen, bk):
+        if bk.centerx > 800: # 左側のプレイヤーの点数を更新
+            self.s1 += 1
+        else: # 右側のプレイヤーの点数を更新
+            self.s2 += 1
+        self.tscore1 = self.fscore1.render(str(self.s1), True, (255, 255, 255))
+        self.tscore2 = self.fscore2.render(str(self.s2), True, (255, 255, 255))
         self.blit(scr)
 
 
-class Bird:
+class Bird: #本田担当分 障害物として存在するこうかとん
+
     def __init__(self, image: str, size: float, xy):
         self.sfc = pg.image.load(image)    # Surface
         self.sfc = pg.transform.rotozoom(self.sfc, 0, size)  # Surface
@@ -147,21 +158,21 @@ class Word: #荒井担当分
     def blit(self,scr :Screen):
         scr.sfc.blit(self.sfc, self.rct) #中央障害物画像の更新
 
-    def update(self, scr: Screen): #更新
-        self.blit(scr)
 
 def main():
     clock = pg.time.Clock()
     scr = Screen("ホッケーゲーム", (1600, 900))
     bkd = Ball("fig/ball.png", (+3,+3), scr)
     kb = Kabe("fig/line1.png",0.75,(50,450))
-    kb2 = Kabe2("fig/line2.png",0.75,(1550,450))
+    kb2 = Kabe("fig/line2.png",0.75,(1550,450))
     
     #障害物 荒井担当分
     obs=[]
     for i in range(3): 
         obs.append(Obstacle("fig/障害物.png"))
-    kkt = Bird("fig/6.png", 2.0, (800, 400))
+
+    kkt = Bird("fig/6.png", 2.0, (900, 400))
+    sc = Score(0, 0)
 
     while True:
         scr.blit()
@@ -169,6 +180,16 @@ def main():
             if event.type == pg.QUIT: return
         kb.update(scr)
         kb2.update(scr)
+        if pg.time.get_ticks() % 1000 == 0: # 追加機能 時間がたつとボールが速くなる　新山担当分
+            if bkd.vx < 0:
+                bkd.vx -= 0.4
+            else:
+                bkd.vx += 0.4
+            if bkd.vy < 0:
+                bkd.vy -= 0.4
+            else:
+                bkd.vy += 0.4
+
         bkd.update(scr)
         kkt.update(scr)
         if bkd.rct.colliderect(kb.rct): # ボールと右側のプレイヤーが当たったらボールが反射する
@@ -196,6 +217,23 @@ def main():
 
         if kkt.rct.colliderect(bkd.rct):
             bkd.vx *= -1
+        # 中野担当分
+
+        if sc.s1 == 5 and sc.s2 < 4: # どちらかが5点取ったらゲーム終了
+            pg.mixer.music.stop()
+            pg.mixer.music.load("ex06/fig/レベルアップ.mp3")
+            pg.mixer.music.play(1)
+            tkm.showinfo("Game Clear", "Player1 Win!!")
+            return
+        elif sc.s2 == 5 and sc.s1 < 4:
+            pg.mixer.music.stop() # BGMがとまる
+            pg.mixer.music.load("ex06/fig/レベルアップ.mp3")# 効果音が鳴る
+            pg.mixer.music.play(1)
+            tkm.showinfo("Game Clear", "Player2 Win!!")
+            return       
+        elif sc.s1 >= 4 and sc.s2 >= 4: # デュースの場合、2点差がついたらゲーム終了
+            if abs(sc.s1 - sc.s2) == 2:
+                return
                 
         pg.display.update()
         clock.tick(1000)
