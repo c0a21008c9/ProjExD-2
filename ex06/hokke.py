@@ -19,7 +19,7 @@ class Screen:
         self.rct = self.sfc.get_rect()         # Rect
         self.bgi_sfc = pg.Surface((1600, 900))    # Surface
         pg.draw.rect(self.bgi_sfc, (0, 0, 0), (0, 0, 1600, 900)) # 背景を黒に塗りつぶし
-        pg.draw.rect(self.bgi_sfc, (0, 255, 255), (790, 0, 50, 900)) # 真ん中の水色の線を作成
+        pg.draw.rect(self.bgi_sfc, (0, 255, 255), (775, 0, 50, 900)) # 真ん中の水色の線を作成
         self.bgi_rct = self.bgi_sfc.get_rect() # Rect
        
     def blit(self):
@@ -194,12 +194,10 @@ def main():
     obs=[]
     for i in range(3): #障害物を３つ生成（荒井）
         obs.append(Obstacle("fig/障害物.png"))
-    bkd = Ball((255,0,0), 25, (+1,+1), scr)
     kkt = Bird("fig/6.png", 2.0, (900, 400))
-    bkd = Ball((255,0,0), 25, (+3,+2), scr)
     bar = Bar("fig/line.jpg",0.225, (800, 450))
-    kb = Kabe((0, 0, 255), 50)
-    kb2 = Kabe2((0, 255, 0), 50)
+    #kb = Kabe((0, 0, 255), 50)
+    #b2 = Kabe2((0, 255, 0), 50)
     sc = Score(0, 0)
 
     while True:
@@ -231,7 +229,6 @@ def main():
         scr.sfc.blit(text, [750, 50])#得点を表示
         if kkt.rct.colliderect(bkd.rct):
             bkd.vx *= -1
-        if sc.s1 == 5 and sc.s2 < 4 or sc.s2 == 5 and sc.s1 < 4: # どちらかが5点取ったらゲーム終了
         if sc.s1 == 5 and sc.s2 < 4: # どちらかが5点取ったらゲーム終了
             pg.mixer.music.stop()
             pg.mixer.music.load("ex06/fig/レベルアップ.mp3")
@@ -247,8 +244,8 @@ def main():
         elif sc.s1 >= 4 and sc.s2 >= 4: # デュースの場合、2点差がついたらゲーム終了
             if abs(sc.s1 - sc.s2) == 2:
                 return
-        if bar.rct.colliderect(kb.rct): #衝突処理
-            kb*=-1
+        if bar.rct.colliderect(bkd.rct): #衝突処理
+            bkd.vx*=-1
         bar.update(scr)
                 
         pg.display.update()
